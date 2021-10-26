@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
-import {QueryClient, QueryClientProvider, useQuery} from "react-query";
+import {QueryClient, QueryClientProvider, useMutation, useQuery} from "react-query";
 
 const styles = StyleSheet.create({
     container: {
@@ -40,7 +40,8 @@ const PokeApi = () => {
 
     const {isLoading, isError, data} = useQuery("pokemon",
         () => fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`).then(res => res.json()));
-    // const mutation = useMutation(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
+
+    const mutation = useMutation(() => queryClient.invalidateQueries('pokemon'));
 
 
     return (
@@ -48,7 +49,7 @@ const PokeApi = () => {
             <View style={styles.search}>
                 <TextInput style={styles.input} value={pokemon} onChangeText={onChangePokemeon}
                            placeholder="Digite o nome do Pokémon"/>
-                <Button title="Caçar" onPress={() => console.log(pokemon)}/>
+                <Button title="Caçar" onPress={() => mutation.mutate()}/>
             </View>
             <View style={styles.pokemon}>
                 {isLoading && <Text>Procurando Pokémon...</Text>}
@@ -58,6 +59,7 @@ const PokeApi = () => {
         </View>
     );
 };
+
 
 interface Pokemon {
     id: number
