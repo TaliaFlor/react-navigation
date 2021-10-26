@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
-import {QueryClient, QueryClientProvider, useMutation, useQuery} from "react-query";
+import {QueryClient, QueryClientProvider, useQuery} from "react-query";
 
 const styles = StyleSheet.create({
     container: {
@@ -20,7 +20,8 @@ const styles = StyleSheet.create({
         marginRight: "0.5em"
     },
     pokemon: {
-        flexDirection: "column"
+        flexDirection: "column",
+        marginTop: "1em"
     }
 });
 
@@ -35,29 +36,58 @@ export default function App() {
 }
 
 const PokeApi = () => {
-    const [pokemeon, onChangePokemeon] = useState("");
-    //
-    // const {isLoading, isError, data} = useQuery("pokemeon", {});
-    // const mutation = useMutation(`https://pokeapi.co/api/v2/pokemon/${pokemeon}`)
-    //
-    // if (isLoading) return <Text>Procurando Pokémon...</Text>;
-    //
-    // if (isError) return <Text>Puxa, parece que esse Pokémon não existe!</Text>;
+    const [pokemon, onChangePokemeon] = useState("pikachu");
+
+    const {isLoading, isError, data} = useQuery("pokemon",
+        () => fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`).then(res => res.json()));
+    // const mutation = useMutation(`https://pokeapi.co/api/v2/pokemon/${pokemon}`)
 
 
     return (
         <View style={styles.container}>
             <View style={styles.search}>
-                <TextInput style={styles.input} value={pokemeon} onChangeText={onChangePokemeon} placeholder="Digite o nome do Pokémon"/>
-                <Button title="Caçar" onPress={() => console.log(pokemeon)}/>
+                <TextInput style={styles.input} value={pokemon} onChangeText={onChangePokemeon}
+                           placeholder="Digite o nome do Pokémon"/>
+                <Button title="Caçar" onPress={() => console.log(pokemon)}/>
             </View>
-            {/*<View style={styles.pokemon}>*/}
-            {/*    <Text>ID: {data.id}</Text>*/}
-            {/*    <Text>Nome: {data.name}</Text>*/}
-            {/*    <Text>Espécie: {data.species.name}</Text>*/}
-            {/*    <Text>Ataques: {data.moves.map(item => item.move.name).join(', ')}</Text>*/}
-            {/*    <Text>Habilidades: {data.abilities.map(item => item.ability.name).join(', ')}</Text>*/}
-            {/*</View>*/}
+            <View style={styles.pokemon}>
+                {isLoading && <Text>Procurando Pokémon...</Text>}
+                {isError && <Text>Puxa, parece que esse Pokémon não existe!</Text>}
+                {data && <PokemonView {...mapToPokemon(data)}/>}
+            </View>
         </View>
     );
 };
+
+interface Pokemon {
+    id: number
+    name: string
+    species: string
+    moves: string[]
+    abilities: string[]
+}
+
+const mapToPokemon = (data): Pokemon => {
+    return {
+        id: data.id,
+        name: data.name,
+        species: data.species.name,
+        moves: data.moves.map(item => item.move.name),
+        abilities: data.abilities.map(item => item.ability.name).slice(0, 5)
+    }
+};
+
+const PokemonView = (pokemon: Pokemon) => {
+    const abilities = pokemon.abilities.length > 5 ? pokemon.abilities.slice(0, 5).join(', ').concat("...") : pokemon.abilities.join(', ');
+    const moves = pokemon.moves.length > 5 ? pokemon.moves.slice(0, 5).join(', ').concat("...") : pokemon.moves.join(', ');
+
+    return (
+        <View>
+            <Text>ID: {pokemon.id}</Text>
+            <Text>Nome: {pokemon.name}</Text>
+            <Text>Espécie: {pokemon.species}</Text>
+            <Text>Habilidades: {abilities}</Text>
+            <Text>Ataques: {moves}</Text>
+        </View>
+    );
+}
