@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "react-query",
-    "slug": "react-query",
+    "name": "react-navigation",
+    "slug": "react-navigation",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

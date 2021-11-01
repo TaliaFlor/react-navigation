@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import {Button, StyleSheet, Text, TextInput, View} from 'react-native';
-import {QueryClient, QueryClientProvider, useMutation, useQuery} from "react-query";
+import {Button, Image, StyleSheet, Text, TextInput, View} from 'react-native';
+import {QueryClient, QueryClientProvider, useQuery} from "react-query";
 
 const styles = StyleSheet.create({
     container: {
@@ -9,8 +9,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    searchContainer: {
+        flexDirection: "column",
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     search: {
-        flexDirection: "row"
+        flexDirection: "row",
+        marginTop: '1em'
     },
     input: {
         height: 40,
@@ -22,6 +28,10 @@ const styles = StyleSheet.create({
     pokemon: {
         flexDirection: "column",
         marginTop: "1em"
+    },
+    logo: {
+        width: '12em',
+        height: '4.3em',
     }
 });
 
@@ -43,17 +53,24 @@ const PokeApi = () => {
     const {isLoading, isError, data} = useQuery(`pokemon-${pokeball}`,
         () => fetch(`https://pokeapi.co/api/v2/pokemon/${pokeball}`).then(res => res.json()));
 
+    const logo = require('./assets/logo.jpg');
     return (
         <View style={styles.container}>
-            <View style={styles.search}>
-                <TextInput style={styles.input} value={pokemon} onChangeText={setPokemeon}
-                           placeholder="Digite o nome do Pokémon"/>
-                <Button title="Caçar" disabled={!pokemon} onPress={() => capturePokemon(pokemon?.trim().toLowerCase())}/>
+            <View style={styles.searchContainer}>
+                <Image style={styles.logo} source={{uri: logo}}/>
+                <View style={styles.search}>
+                    <TextInput style={styles.input} value={pokemon} onChangeText={setPokemeon}
+                               placeholder="Digite o nome do Pokémon"/>
+                    <Button title="Caçar" disabled={!pokemon}
+                            onPress={() => capturePokemon(pokemon?.trim().toLowerCase())}/>
+                </View>
             </View>
             <View style={styles.pokemon}>
-                {isLoading && <Text>Procurando Pokémon...</Text>}
-                {isError && <Text>Puxa, parece que esse Pokémon não existe!</Text>}
-                {data && <PokemonView {...mapToPokemon(data)}/>}
+                {pokeball &&
+                    (isLoading && <Text>Procurando Pokémon...</Text>)
+                    || (isError && <Text>Puxa, parece que esse Pokémon não existe!</Text>)
+                    || (data && <PokemonView {...mapToPokemon(data)}/>)
+                }
             </View>
         </View>
     );
