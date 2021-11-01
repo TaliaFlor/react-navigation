@@ -36,20 +36,19 @@ export default function App() {
 }
 
 const PokeApi = () => {
-    const [pokemon, onChangePokemeon] = useState("pikachu");
+    const [pokemon, setPokemeon] = useState<string>();
 
-    const {isLoading, isError, data} = useQuery("pokemon",
-        () => fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}`).then(res => res.json()));
+    const [pokeball, capturePokemon] = useState<string>();
 
-    const mutation = useMutation(() => queryClient.invalidateQueries('pokemon'));
-
+    const {isLoading, isError, data} = useQuery(`pokemon-${pokeball}`,
+        () => fetch(`https://pokeapi.co/api/v2/pokemon/${pokeball}`).then(res => res.json()));
 
     return (
         <View style={styles.container}>
             <View style={styles.search}>
-                <TextInput style={styles.input} value={pokemon} onChangeText={onChangePokemeon}
+                <TextInput style={styles.input} value={pokemon} onChangeText={setPokemeon}
                            placeholder="Digite o nome do Pokémon"/>
-                <Button title="Caçar" onPress={() => mutation.mutate()}/>
+                <Button title="Caçar" disabled={!pokemon} onPress={() => capturePokemon(pokemon?.trim().toLowerCase())}/>
             </View>
             <View style={styles.pokemon}>
                 {isLoading && <Text>Procurando Pokémon...</Text>}
